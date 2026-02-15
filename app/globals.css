@@ -2,25 +2,174 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --accent-blue: #2563eb;
+  --accent-cyan: #0891b2;
+  --accent-green: #059669;
+  --accent-purple: #7c3aed;
+  --surface: #f9fafb;
+  --surface-2: #f3f4f6;
+  --surface-3: #e5e7eb;
+  --border: #e5e7eb;
+  --border-bright: #d1d5db;
+  --muted: #6b7280;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-cyan: var(--accent-cyan);
+  --color-accent-green: var(--accent-green);
+  --color-accent-purple: var(--accent-purple);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-bright: var(--border-bright);
+  --color-muted: var(--muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-bright);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Grid background pattern */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Glow effects */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.12), 0 0 60px rgba(37, 99, 235, 0.04);
+}
+.glow-green {
+  box-shadow: 0 0 20px rgba(5, 150, 105, 0.12), 0 0 60px rgba(5, 150, 105, 0.04);
+}
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(8, 145, 178, 0.12), 0 0 60px rgba(8, 145, 178, 0.04);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #2563eb, #0891b2, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4, #10b981);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+/* Pulse animation for live indicator */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.5); }
+}
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Float animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Canvas drawing area */
+.drawing-canvas {
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+
+/* React Flow custom styles */
+.react-flow__node {
+  border-radius: 8px !important;
+}
+.react-flow__edge-path {
+  stroke-width: 2 !important;
+}
+.react-flow__background {
+  background: var(--surface) !important;
+}
+
+/* Slider track styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
+  height: 24px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--border-bright);
+  border-radius: 2px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  margin-top: -6px;
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: var(--border-bright);
+  border-radius: 2px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  border: 2px solid var(--background);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
