@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   FlaskConical,
   Dna,
+  Plus,
+  X,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -23,7 +25,7 @@ interface ParamRange {
   step: number;
 }
 
-const paramRanges: ParamRange[] = [
+const defaultParamRanges: ParamRange[] = [
   { label: "Mask Angle", unit: "deg", min: 25, max: 115, step: 1 },
   { label: "Exposure Time", unit: "ms", min: 500, max: 10000, step: 100 },
 ];
@@ -65,6 +67,28 @@ export default function FabricationControl() {
   const [statusText, setStatusText] = useState("");
   const [logSteps, setLogSteps] = useState<string[]>([]);
   const [optimalParams, setOptimalParams] = useState<OptimalParams | null>(null);
+
+  // Custom parameters
+  const [paramRanges, setParamRanges] = useState<ParamRange[]>(defaultParamRanges);
+  const [showAddParam, setShowAddParam] = useState(false);
+  const [newParam, setNewParam] = useState<ParamRange>({
+    label: "",
+    unit: "",
+    min: 0,
+    max: 100,
+    step: 1,
+  });
+
+  const addParam = () => {
+    if (!newParam.label.trim()) return;
+    setParamRanges((prev) => [...prev, { ...newParam, label: newParam.label.trim(), unit: newParam.unit.trim() }]);
+    setNewParam({ label: "", unit: "", min: 0, max: 100, step: 1 });
+    setShowAddParam(false);
+  };
+
+  const removeParam = (index: number) => {
+    setParamRanges((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const running = status === "running";
 
@@ -185,18 +209,23 @@ export default function FabricationControl() {
 
             {/* Parameter Ranges (search space) */}
             <div className="bg-surface rounded-xl border border-border p-6">
-              <h3 className="text-sm font-semibold mb-1">
-                Process Parameters — Search Space
-              </h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-sm font-semibold">
+                  Process Parameters — Search Space
+                </h3>
+                <span className="text-[10px] font-mono text-muted/40">
+                  {paramRanges.length} param{paramRanges.length !== 1 && "s"}
+                </span>
+              </div>
               <p className="text-[10px] text-muted/60 font-mono mb-4">
                 The evolutionary optimizer will search within these ranges
               </p>
 
-              <div className="space-y-3">
-                {paramRanges.map((p) => (
+              <div className="space-y-2">
+                {paramRanges.map((p, i) => (
                   <div
-                    key={p.label}
-                    className="flex items-center gap-3 p-2.5 bg-surface-2 rounded-lg border border-border"
+                    key={`${p.label}-${i}`}
+                    className="group flex items-center gap-3 p-2.5 bg-surface-2 rounded-lg border border-border"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-medium truncate">
@@ -213,9 +242,128 @@ export default function FabricationControl() {
                         {p.unit}
                       </span>
                     </div>
+                    <button
+                      onClick={() => removeParam(i)}
+                      disabled={running}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-muted/40 hover:text-red-400 disabled:pointer-events-none"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
+
+              {/* Add parameter */}
+              <AnimatePresence>
+                {showAddParam && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-3 p-3 bg-surface-2 rounded-lg border border-accent-blue/30 space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Parameter name"
+                          value={newParam.label}
+                          onChange={(e) =>
+                            setNewParam((p) => ({ ...p, label: e.target.value }))
+                          }
+                          className="bg-background border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted/40 focus:outline-none focus:border-accent-blue/50"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Unit (e.g. rpm)"
+                          value={newParam.unit}
+                          onChange={(e) =>
+                            setNewParam((p) => ({ ...p, unit: e.target.value }))
+                          }
+                          className="bg-background border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted/40 focus:outline-none focus:border-accent-blue/50"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-[10px] text-muted/50 mb-1 block">
+                            Min
+                          </label>
+                          <input
+                            type="number"
+                            value={newParam.min}
+                            onChange={(e) =>
+                              setNewParam((p) => ({
+                                ...p,
+                                min: parseFloat(e.target.value) || 0,
+                              }))
+                            }
+                            className="w-full bg-background border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:border-accent-blue/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted/50 mb-1 block">
+                            Max
+                          </label>
+                          <input
+                            type="number"
+                            value={newParam.max}
+                            onChange={(e) =>
+                              setNewParam((p) => ({
+                                ...p,
+                                max: parseFloat(e.target.value) || 100,
+                              }))
+                            }
+                            className="w-full bg-background border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:border-accent-blue/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-muted/50 mb-1 block">
+                            Step
+                          </label>
+                          <input
+                            type="number"
+                            value={newParam.step}
+                            onChange={(e) =>
+                              setNewParam((p) => ({
+                                ...p,
+                                step: parseFloat(e.target.value) || 1,
+                              }))
+                            }
+                            className="w-full bg-background border border-border rounded-md px-3 py-2 text-xs font-mono text-foreground focus:outline-none focus:border-accent-blue/50"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={addParam}
+                          disabled={!newParam.label.trim()}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-md bg-accent-blue text-white hover:bg-accent-blue/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Plus size={12} />
+                          Add
+                        </button>
+                        <button
+                          onClick={() => setShowAddParam(false)}
+                          className="px-3 py-2 text-xs text-muted hover:text-foreground transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {!showAddParam && (
+                <button
+                  onClick={() => setShowAddParam(true)}
+                  disabled={running}
+                  className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-border hover:border-accent-blue/50 text-xs text-muted hover:text-accent-blue transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                >
+                  <Plus size={14} />
+                  Add Process Parameter
+                </button>
+              )}
             </div>
 
             {/* Advanced Toggle */}
